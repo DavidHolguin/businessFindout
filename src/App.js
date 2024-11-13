@@ -6,14 +6,15 @@ import CompanyDetail from './components/CompanyDetail';
 import Search from './components/Search';
 import Login from './components/Login';
 import Register from './components/Register';
-import MenuBar from './components/MenuBar';
+import MenuBar from './components/MenuBar'; // Importa el componente MenuBar.js
 import Profile from './components/Profile';
 import Settings from './components/Settings';
 import CompanyCategory from './components/CompanyCategory';
 import JoinFindoutPage from './components/JoinFindoutPage';
 import QRScanner from './components/QRScanner';
 import ShoppingCartComponent from './components/ShoppingCartComponent';
-import IOSInstallGuide from './components/IOSInstallGuide'; // Add this import
+import IOSInstallGuide from './components/IOSInstallGuide';
+import RestaurantDashboard from './components/RestaurantDashboard';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -45,7 +46,7 @@ function App() {
         <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         <main className="container mx-auto pt-16 pb-14 text-gray-900 dark:text-white">
           <Routes>
-            <Route path="/" element={<CompanyList />} />
+            <Route path="/" element={<RestaurantDashboard />} />
             <Route path="/company/:id" element={<CompanyDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/login" element={<Login />} />
@@ -55,12 +56,11 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/company-categories/:categoryId" element={<CompanyCategory />} />
             <Route path="/register-business" element={<JoinFindoutPage />} />
-            <Route path="/download" element={<IOSInstallGuide />} /> 
-            
-            <Route path="/cart/:companyId" element={<ShoppingCartComponent />} />     
+            <Route path="/download" element={<IOSInstallGuide />} />
+            <Route path="/cart/:companyId" element={<ShoppingCartComponent />} />
           </Routes>
         </main>
-        <MenuBar />
+        <MenuBar /> {/* Renderiza el componente MenuBar */}
       </div>
     </Router>
   );

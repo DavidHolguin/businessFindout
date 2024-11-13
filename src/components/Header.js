@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, ShoppingBag } from 'lucide-react';
+import { Menu, Bell } from 'lucide-react';
 import axios from 'axios';
 import MobileMenu from './MobileMenu';
 
@@ -9,9 +9,12 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const navigate = useNavigate();
   
   const API_URL = 'https://backendfindout-ea692e018a66.herokuapp.com/api/login/';
+  const NOTIFICATIONS_URL = 'https://backendfindout-ea692e018a66.herokuapp.com/api/notifications/';
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,6 +30,11 @@ const Header = () => {
 
         const response = await axios.get(API_URL, config);
         setUser(response.data);
+
+        // Fetch notifications
+        const notificationsResponse = await axios.get(NOTIFICATIONS_URL, config);
+        setNotifications(notificationsResponse.data);
+        setUnreadNotifications(notificationsResponse.data.filter(n => !n.read).length);
       } catch (err) {
         console.error('Error fetching user data:', err);
         localStorage.removeItem('token');
@@ -59,23 +67,24 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleCartClick = (e) => {
-    e.preventDefault();
-    const savedCart = localStorage.getItem('shopping_cart');
-    if (savedCart) {
-      const cart = JSON.parse(savedCart);
-      const companyIds = Object.keys(cart);
-      if (companyIds.length > 0) {
-        // Navegar al carrito de la primera empresa que encontremos
-        navigate(`/cart/${companyIds[0]}`);
-      } else {
-        // Si no hay compañías en el carrito, navegar a la página principal
-        navigate('/');
+  const handleNotificationClick = () => {
+    // Mark notifications as read
+    const token = localStorage.getItem('token');
+    const config = {
+      headers: {
+        'Authorization': `Token ${token}`
       }
-    } else {
-      // Si no hay carrito guardado, navegar a la página principal
-      navigate('/');
-    }
+    };
+    
+    notifications.forEach(async (notification) => {
+      if (!notification.read) {
+        await axios.patch(`${NOTIFICATIONS_URL}${notification.id}/`, { read: true }, config);
+      }
+    });
+
+    setUnreadNotifications(0);
+    // Navigate to notifications page or show modal
+    navigate('/notifications');
   };
 
   return (
@@ -106,13 +115,18 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Cart */}
-          <button 
-            onClick={handleCartClick}
-            className="text-white hover:opacity-80 transition-opacity"
-            aria-label="Shopping cart"
+          {/* Notifications */}
+          <button
+            onClick={handleNotificationClick}
+            className="text-white hover:opacity-80 transition-opacity relative"
+            aria-label="Notifications"
           >
-            <ShoppingBag className="w-6 h-6" />
+            <Bell className="w-6 h-6" />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white font-bold rounded-full px-2 py-1 text-xs transform translate-x-1/2 -translate-y-1/2">
+                {unreadNotifications}
+              </span>
+            )}
           </button>
         </nav>
 
